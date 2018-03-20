@@ -1,65 +1,50 @@
-BUBBLEUP = (ev, attr) => {
-    // console.log('EVENT', ev.type);
-    alert('EVENT '+ ev.type);
-    if(ev.composed) var source = ev.composedPath()[0];
-    else var source = ev.target;
-    var CE = ev.target;
-    ev = JSON.parse(JSON.stringify(ev));
-    var findAttr = (el,fn) => {
-        if(!el) return;
-        if(el.hasAttribute(attr)) fn(el);
-        findAttr(el.parentElement);
+TAPJS = {
+    TREE: node => {
+        while(node){
+            list = node;
+            node = node.parentElement;
+        }
+        return list;
+    },
+
+    ACT: (ev,attr) => {
+        // LOG(`EVENT: ${ev.type} (${attr})`);
+        
+        if(ev.composedPath) var path = ev.composedPath();
+        else var path = TAPJS.TREE(ev.target);
+        // console.log('path',path);
+
+        var CE = ev.target;
+        ev = JSON.parse(JSON.stringify(ev));
+
+        for(var i=0; i<path.length; i++){
+            var el = path[i];
+            if(!el.getAttribute) continue;
+            // LOG('check '+ el.tagName);
+            // console.log('check',el);
+            // if(el.hasAttribute(attr)){
+            var fn = el.getAttribute(attr);
+            // LOG(`found ${el.tagName}  (${fn})`);
+            ev.target = el;
+            if(fn)
+                if(CE[fn]) CE[fn](ev);
+                else if(window[fn]) window[fn](ev);
+                else console.warn(fn,'not found');
+            // }
+        }
     }
-    findAttr(source, el=>{
-        var fn = el.getAttribute(attr);
-        // console.log('found',el,attr,fn);
-        ev.target = el;
-        if(CE[fn]) CE[fn](ev);
-        else if(window[fn]) window[fn](ev);
-        else console.warn(fn,'not found');
-    });    
 }
 
 window.addEventListener('click', ev => {
-    alert('td '+window.performance.now() - window.TOUCHEND);
-    if(window.performance.now() - window.TOUCHEND < 500) return;
-    BUBBLEUP(ev, 'on-tap');
+    // LOG('click-delta '+Math.round(window.performance.now() - window.TOUCHEND));
+    if(window.performance.now() - TAPJS.TOUCHEND < 500) return ev.preventDefault();
+    TAPJS.ACT(ev, 'on-tap');
 });
 
-window.addEventListener('touchstart', ev => TOUCHMOVE = false);
-window.addEventListener('touchmove', ev => TOUCHMOVE = true);
+window.addEventListener('touchstart', ev => TAPJS.TOUCHMOVE = false);
+window.addEventListener('touchmove', ev => TAPJS.TOUCHMOVE = true);
 window.addEventListener('touchend', ev => {
-    TOUCHEND = window.performance.now();
-    if (!TOUCHMOVE) BUBBLEUP(ev, ' on-tap');
+    TAPJS.TOUCHEND = window.performance.now();
+    if (!TAPJS.TOUCHMOVE) TAPJS.ACT(ev, 'on-tap');
 });
 
-
-
-    // var CE = ev.target;
-    // var path = ev.composedPath();
-    // for (var i = 0; i < path.length; i++) {
-    //     console.log('path',path[i]);
-    //     var fn = path[i].getAttribute(attr);
-    //     ev2.target = path[i];
-    //     if (CE[fn]) CE[fn](ev2);
-    // }
-
-
-// window.addEventListener('keyup', ev => {
-//     if (ev.key == 'Enter') BUBBLEUP(ev, 'on-enter');
-// });
-
-
-
-// var CE = ev.target;
-// var fn = ev.composedPath()[0].getAttribute('on-tap');
-// CE[fn](ev);
-
-
-// var CE = ev.target;
-// var path = ev.composedPath();
-// for(var i=0; i<path.length; i++){
-// 	var fn = path[i].getAttribute('on-tap');
-// 	ev.target = path[i];
-// 	if(fn) CE[fn](ev);
-// }
