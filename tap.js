@@ -21,7 +21,7 @@ BUBBLEUP = (ev, attr) => {
 }
 
 window.addEventListener('click', ev => {
-    // console.log(window.performance.now() - window.TOUCHEND);
+    alert('td '+window.performance.now() - window.TOUCHEND);
     if(window.performance.now() - window.TOUCHEND < 500) return;
     BUBBLEUP(ev, 'on-tap');
 });
