@@ -1,0 +1,23 @@
+<script src='tap.js'></script>
+
+<tap-demo></tap-demo>
+
+<button on-tap='doSth'>HTML Body</button>
+
+<script>
+function doSth(){
+	alert('body');
+}
+
+
+document.head.insertAdjacentHTML('beforeend', `<template id="tap-demo"><button on-tap="doSth">CustomElement</button></template>`);
+window.customElements.define('tap-demo', class extends HTMLElement {
+	constructor() {
+		super();
+		this.attachShadow({mode: 'open'}).appendChild(document.querySelector('#tap-demo').content.cloneNode(true));
+	}
+    doSth(){
+    	alert('CE');
+    }
+});
+</script>
