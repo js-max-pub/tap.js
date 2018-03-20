@@ -1,5 +1,6 @@
 BUBBLEUP = (ev, attr) => {
     // console.log('EVENT', ev.type);
+    alert('EVENT '+ ev.type);
     if(ev.composed) var source = ev.composedPath()[0];
     else var source = ev.target;
     var CE = ev.target;
