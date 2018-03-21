@@ -1,7 +1,7 @@
 <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
 
 
-<script src='tap.min.js'></script>
+<script src='tap.js'></script>
 
 
 <template id="tap-demo">
@@ -23,7 +23,7 @@
 	}
 
 
-
+	if(!window.customElements) window.customElements = {define:()=>{}};
 	window.customElements.define('tap-demo', class extends HTMLElement {
 		constructor() {
 			super();

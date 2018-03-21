@@ -1,7 +1,9 @@
 TAPJS = {
     TREE: node => {
+        console.log('TREE',node);
+        var list = [];
         while(node){
-            list = node;
+            list.push(node);
             node = node.parentElement;
         }
         return list;
@@ -9,12 +11,15 @@ TAPJS = {
 
     ACT: (ev,attr) => {
         // LOG(`EVENT: ${ev.type} (${attr})`);
-        
+        // console.log(ev.composedPath? ev.composedPath():'none');
         if(ev.composedPath) var path = ev.composedPath();
         else var path = TAPJS.TREE(ev.target);
-        // console.log('path',path);
+        console.log('path',path);
+        CEs = path.filter(x=>(x.tagName && x.tagName.includes('-')));
+        CEs.push(window);
+        // console.log('CEs',CEs);
 
-        var CE = ev.target;
+        // var CE = ev.target;
         ev = JSON.parse(JSON.stringify(ev));
 
         for(var i=0; i<path.length; i++){
@@ -26,11 +31,14 @@ TAPJS = {
             var fn = el.getAttribute(attr);
             // LOG(`found ${el.tagName}  (${fn})`);
             ev.target = el;
-            if(fn)
-                if(CE[fn]) CE[fn](ev);
-                else if(window[fn]) window[fn](ev);
-                else console.warn(fn,'not found');
-            // }
+            if(fn){
+                var ces = CEs.filter(ce=>ce[fn]);
+                ces.forEach(ce=>ce[fn](ev));
+                if(!ces.length) console.warn(fn,'not found');
+            }
+                // if(CE[fn]) CE[fn](ev);
+                // else if(window[fn]) window[fn](ev);
+                // else console.warn(fn,'not found');
         }
     }
 }
