@@ -1,23 +1,113 @@
 TAPJS = {
-    event:(ev)=>{
-        var base = ev.composedPath ? ev.composedPath()[0] : ev.target;
+    E:e=>{
+        var base = e.composedPath ? e.composedPath()[0] : e.target;
         base.dispatchEvent( new CustomEvent('tap', {bubbles: true,composed: true}));
+    },
+    P:()=>window.performance.now(),
+    L:(t,e)=>window.addEventListener(t,e),
+
+
+    ACT: ev => {
+        var path = ev.composedPath ? ev.composedPath() : TAPJS.PATH(ev.target);
+        console.log('ACT', path);
+        TAPJS.BUBBLE(path);
+    },
+    PATH: node => {
+        return node ? [node].concat(TAPJS.TREE(node.parentElement)) : [];
+        // console.log('TREE-rec', node);
+        // if(!node) return [];
+        // return [node].concat(TAPJS.TREE(node.parentElement))
+    },
+    BUBBLE: path => {
+        // console.log('BUBBLE', path.length);
+        var node = path.shift();
+        if (!node) return;
+        if (node.getAttribute) {
+            var fn = node.getAttribute('on-tap');
+            if (fn) {
+                var CEs = [node].concat(path.filter(x => (x.tagName && x.tagName.includes('-')))).concat([window]);
+                var CEsFN = CEs.filter(CE=>CE[fn]);
+                if(CEsFN.length) CEsFN[0][fn]({target:node});
+                //else if(fn=='click') node.dispatchEvent(new MouseEvent('click',{bubbles:false}));
+                else console.warn(fn,'not found in',CEs);
+                
+                // ces.forEach(ce=>ce[fn](ev));
+            } else {
+        // console.log('tagname', path[0]);
+                
+                if(node.tagName=='LABEL') 
+                    var input = path[0].querySelector('#'+node.getAttribute('for'));
+                if(node.tagName=='INPUT') 
+                    var input = node;
+                if(input){
+                    console.log('INPUT2',input);
+                    input.dispatchEvent(new MouseEvent('click'));
+                }
+                // node.dispatchEvent(new MouseEvent('click',{bubbles:false}));
+            }
+        }
+        TAPJS.BUBBLE(path);
     }
 }
-window.addEventListener('click', ev => {
-    if(window.performance.now() - TAPJS.TOUCHEND < 500) 
+
+
+
+
+
+
+
+
+
+
+TAPJS.L('tap', TAPJS.ACT);
+TAPJS.L('touchstart', e => TAPJS.TM = false);
+TAPJS.L('touchmove', e => TAPJS.TM = true);
+TAPJS.L('touchend', e => {
+    TAPJS.TE = TAPJS.P();
+    if (!TAPJS.TM) 
+        TAPJS.E(e);
+});
+TAPJS.L('click', ev => {
+    if(TAPJS.P() - TAPJS.TE < 400) 
         return ev.preventDefault();
-    TAPJS.event(ev);
-});
-
-window.addEventListener('touchstart', ev => TAPJS.TOUCHMOVE = false);
-window.addEventListener('touchmove', ev => TAPJS.TOUCHMOVE = true);
-window.addEventListener('touchend', ev => {
-    TAPJS.TOUCHEND = window.performance.now();
-    if (!TAPJS.TOUCHMOVE) 
-        TAPJS.event(ev);
+    console.log('CLICK')
+    TAPJS.TE = TAPJS.P();
+    TAPJS.E(ev);
 });
 
 
 
 
+
+
+
+
+
+
+//REQ: tap.js
+
+
+
+                    // var input = node.parentElement.querySelector('#'+node.getAttribute('for'));
+
+
+
+
+
+                // console.log('CICK-event',node,node.tagName,node.parentElement);
+                // console.log('CES',CEs);
+                    // var input = CEs[1].querySelector('#'+node.getAttribute('for'));
+
+
+
+
+
+    // TAPJS.TOUCHEND = window.performance.now();
+
+    // TAPJS.TOUCHEND = window.performance.now();
+    // console.log('click-it3', ev, window.performance.now() - TAPJS.TOUCHEND);
+    // if(window.performance.now() - TAPJS.TOUCHEND < 400) {
+// window.addEventListener('click', ev => {
+// window.addEventListener('touchstart', ev => TAPJS.TOUCHMOVE = false);
+// window.addEventListener('touchmove', ev => TAPJS.TOUCHMOVE = true);
+// window.addEventListener('touchend', ev => {
