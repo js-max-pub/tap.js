@@ -1,15 +1,18 @@
 TAPJS = {
     E:e=>{
+        // console.log('E',e.target,e.composedPath);
         var base = e.composedPath ? e.composedPath()[0] : e.target;
-        base.dispatchEvent( new CustomEvent('tap', {bubbles: true,composed: true}));
+        // console.log('base',base);
+        base.dispatchEvent( new Event('tap', {bubbles: true,composed: true}));
     },
     P:()=>window.performance.now(),
     L:(t,e)=>window.addEventListener(t,e),
 
 
     ACT: ev => {
+        // console.log('event', ev.target);
         var path = ev.composedPath ? ev.composedPath() : TAPJS.PATH(ev.target);
-        console.log('ACT', path);
+        // console.log('PATH', path);
         TAPJS.BUBBLE(path);
     },
     PATH: node => {
@@ -22,6 +25,8 @@ TAPJS = {
         // console.log('BUBBLE', path.length);
         var node = path.shift();
         if (!node) return;
+        console.log('dispatchEvent',node);
+        // node.dispatchEvent(new Event('tap2'));
         if (node.getAttribute) {
             var fn = node.getAttribute('on-tap');
             if (fn) {
@@ -29,7 +34,8 @@ TAPJS = {
                 var CEsFN = CEs.filter(CE=>CE[fn]);
                 if(CEsFN.length) CEsFN[0][fn]({target:node});
                 //else if(fn=='click') node.dispatchEvent(new MouseEvent('click',{bubbles:false}));
-                else console.warn(fn,'not found in',CEs);
+                // else console.warn(fn,'not found in',CEs);
+                console.log(fn,'found in',CEsFN);
                 
                 // ces.forEach(ce=>ce[fn](ev));
             } else {
@@ -70,7 +76,7 @@ TAPJS.L('touchend', e => {
 TAPJS.L('click', ev => {
     if(TAPJS.P() - TAPJS.TE < 400) 
         return ev.preventDefault();
-    console.log('CLICK')
+    // console.log('CLICK')
     TAPJS.TE = TAPJS.P();
     TAPJS.E(ev);
 });
